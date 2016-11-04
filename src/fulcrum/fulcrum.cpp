@@ -22,7 +22,10 @@
 #include <kodo_fulcrum/fulcrum_codes.hpp>
 
 using namespace std;
-//This is the first version of project
+//This is a temporary change
+//everything changes with store in here
+
+
 int run(float e1,float e2, uint32_t expansion);
 float min(float a, float b);
 ofstream myfile;
