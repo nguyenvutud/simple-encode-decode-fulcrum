@@ -32,20 +32,20 @@ ofstream myfile;
 int main()
 {
 	srand (time(NULL));
-	int runs=200;
+	int runs=0;
     std::vector<int> packets_sent;
 	myfile.open("out.csv");
 	myfile<<"ErasureProb,RelayPackets,DestinationPackets,Expansion,\n";
 
     // Seed the random number generator to produce different data every time
     srand((uint32_t)time(0));
-    for(uint32_t exp=1; exp<=2;exp++)
-    	for(int err =0; err<=8; err++)
+    for(uint32_t exp=1; exp<=1;exp++)
+    	for(int err =0; err<=0; err++)
     	{
     		packets_sent.empty();
-    		for(int i=0;i<runs;i++)
+    		for(int i=0;i<=runs;i++)
     		{
-    			packets_sent.push_back(run(0.0,err*0.1,exp));
+    			packets_sent.push_back(run(0.1,err*0.1,exp));
 
     		}
     		int sum = std::accumulate(packets_sent.begin(), packets_sent.end(), 0);
@@ -160,29 +160,28 @@ int run(float e1,float e2, uint32_t expansion)
 //                  << bytes_used << std::endl;
         source_packets++;
         // Simulate a channel with a 50% loss rate
-//        if (( (float) rand()/RAND_MAX) < e1)
-//        {
-//        	lost_link1++;
-//            continue;
-//        }
+        if (( (float) rand()/RAND_MAX) <= e1)
+        {
+        	lost_link1++;
+            continue;
+        }
 
 
         relay_packets++;
-//        recoder->read_payload(payload.data());
-//       	recoder->nested()->write_payload(payload_recoder.data());
+        recoder->read_payload(payload.data());
+       	recoder->nested()->write_payload(payload_recoder.data());
 
 //         Simulate a channel with a e2 loss rate
-        if (( (float) rand()/ RAND_MAX) < e2)
+        if (( (float) rand()/ RAND_MAX) <= e2)
         {
             lost_link2++;
             continue;
         }
         destination_packets++;
-       	decoder.read_payload(payload.data());
-//        decoder.read_payload(payload_recoder.data());
-       	cout<<"Rank:"<<decoder.rank()<<endl;
-//        std::cout << "Payload processed by decoder, current rank = "
-//                  << decoder.rank() << std::endl << std::endl;
+//       	decoder.read_payload(payload.data());
+        decoder.read_payload(payload_recoder.data());
+        std::cout << "Payload processed by decoder, current rank = "
+                  << decoder.rank() << std::endl << std::endl;
     }
 
 //    std::cout << "Lost link1: " << lost_link1 << std::endl;
