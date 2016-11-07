@@ -33,7 +33,7 @@ ofstream myfile;
 int main()
 {
     srand((uint32_t)time(0));
-	int runs=100;
+	int runs=30;
     std::vector<int> packets_sent;
 	myfile.open("out.csv");
 	myfile<<"ErasureProb,RelayPackets,DestinationPackets,Expansion,\n";
@@ -63,7 +63,7 @@ int main()
 int run(float e1,float e2, uint32_t expansion)
 {
     // Set the number of symbols and the symbol size
-    uint32_t max_symbols = 16;
+    uint32_t symbols = 32;
     uint32_t max_symbol_size = 1600;
 
     // Create encoder/decoder factories that we will use to build the actual
@@ -71,20 +71,20 @@ int run(float e1,float e2, uint32_t expansion)
     kodocpp::encoder_factory encoder_factory(
         kodocpp::codec::fulcrum,
         kodocpp::field::binary8,
-        max_symbols,
+        symbols,
         max_symbol_size);
 
     // We query the maximum number of expansion symbols for the fulcrum factory
 //    std::cout << "Max expansion of the encoder factory: "
 //              << encoder_factory.max_expansion() << std::endl;
 
-    kodo_fulcrum::fulcrum_inner_decoder<fifi::binary>::factory recoder_factory(max_symbols, max_symbol_size);
-    kodo_fulcrum::fulcrum_combined_decoder<fifi::binary8>::factory decoder_factory(max_symbols, max_symbol_size);
+    kodo_fulcrum::fulcrum_inner_decoder<fifi::binary>::factory recoder_factory(symbols, max_symbol_size);
+    kodo_fulcrum::fulcrum_combined_decoder<fifi::binary8>::factory decoder_factory(symbols, max_symbol_size);
 
 ////    kodocpp::decoder_factory decoder_factory(
 //         kodocpp::codec::fulcrum,
 //         kodocpp::field::binary8,
-//         max_symbols,
+//         symbols,
 //         max_symbol_size);
 
 
@@ -204,7 +204,7 @@ int run(float e1,float e2, uint32_t expansion)
 //                  << "please file a bug report :)" << std::endl;
 //    }
 
-    myfile << e2 << "," <<relay_packets-max_symbols/(1-e2) << "," << source_packets-max_symbols/(1-e2) << "," <<expansion <<"," <<endl;
+    myfile << e2 << "," <<relay_packets-symbols/(1-e2) << "," << source_packets+relay_packets-(symbols/(1-e1)+symbols/(1-e2))  << "," <<expansion <<"," <<endl;
 
 //    std::cout << source_packets << " "
 //    		<< lost_link1 << " "
@@ -212,7 +212,7 @@ int run(float e1,float e2, uint32_t expansion)
 //			<< lost_link2 << " "
 //			<< destination_packets << endl;
 
-    		//<< source_packets-max_symbols/(1-e2)<<","<<source_packets-(max_symbols/min(1-e1,1-e2))<<","<<expansion <<"," <<endl;
+    		//<< source_packets-symbols/(1-e2)<<","<<source_packets-(symbols/min(1-e1,1-e2))<<","<<expansion <<"," <<endl;
 //    myfile<<e2<<"," << source_packets-relay_packets<<","<<relay_packets-destination_packets<<","<<expansion <<"," <<endl;
     return source_packets;
 }
