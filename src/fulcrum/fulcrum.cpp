@@ -204,7 +204,7 @@ int run(float e1,float e2, uint32_t expansion)
 //                  << "please file a bug report :)" << std::endl;
 //    }
 
-    myfile << e2 << "," <<relay_packets-symbols/(1-e2) << "," << source_packets+relay_packets-(symbols/(1-e1)+symbols/(1-e2))  << "," <<expansion <<"," <<endl;
+    myfile << e2 << "," <<source_packets-symbols/(1-e2) << "," << source_packets+relay_packets-(symbols/(1-e1)+symbols/(1-e2))  << "," <<expansion <<"," <<endl;
 
 //    std::cout << source_packets << " "
 //    		<< lost_link1 << " "
