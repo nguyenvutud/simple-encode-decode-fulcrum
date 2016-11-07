@@ -20,6 +20,7 @@
 #include <fstream>
 #include <kodocpp/kodocpp.hpp>
 #include <kodo_fulcrum/fulcrum_codes.hpp>
+#include <storage/storage.hpp>
 
 using namespace std;
 //This is a temporary change
@@ -31,16 +32,16 @@ float min(float a, float b);
 ofstream myfile;
 int main()
 {
-	srand (time(NULL));
-	int runs=0;
+    srand((uint32_t)time(0));
+	int runs=100;
     std::vector<int> packets_sent;
 	myfile.open("out.csv");
 	myfile<<"ErasureProb,RelayPackets,DestinationPackets,Expansion,\n";
 
     // Seed the random number generator to produce different data every time
-    srand((uint32_t)time(0));
-    for(uint32_t exp=1; exp<=1;exp++)
-    	for(int err =0; err<=0; err++)
+
+    for(uint32_t exp=1; exp<=2;exp++)
+    	for(int err =0; err<=8; err++)
     	{
     		packets_sent.empty();
     		for(int i=0;i<=runs;i++)
@@ -48,9 +49,9 @@ int main()
     			packets_sent.push_back(run(0.1,err*0.1,exp));
 
     		}
-    		int sum = std::accumulate(packets_sent.begin(), packets_sent.end(), 0);
-    		cout<<"The average packets sent:"<<(float)sum/packets_sent.size()<<endl;
-    		cout<<"The expected number of transmitted packets depends on the error links:"<< 16/min(0.9,1-err*0.1)<<endl;
+//    		int sum = std::accumulate(packets_sent.begin(), packets_sent.end(), 0);
+//    		cout<<"The average packets sent:"<<(float)sum/packets_sent.size()<<endl;
+//    		cout<<"The expected number of transmitted packets depends on the error links:"<< 16/min(0.9,1-err*0.1)<<endl;
 //    		myfile<<err*0.1<<"," << 16/min(0.9,1-err*0.1)-(float)sum/packets_sent.size()<<","<<(float)sum/packets_sent.size()-16/min(0.9,1-err*0.1)<<","<<exp <<"," <<endl;
     	}
     myfile.close();
@@ -62,7 +63,7 @@ int main()
 int run(float e1,float e2, uint32_t expansion)
 {
     // Set the number of symbols and the symbol size
-    uint32_t max_symbols = 32;
+    uint32_t max_symbols = 16;
     uint32_t max_symbol_size = 1600;
 
     // Create encoder/decoder factories that we will use to build the actual
@@ -78,13 +79,13 @@ int run(float e1,float e2, uint32_t expansion)
 //              << encoder_factory.max_expansion() << std::endl;
 
     kodo_fulcrum::fulcrum_inner_decoder<fifi::binary>::factory recoder_factory(max_symbols, max_symbol_size);
-//    kodo_fulcrum::fulcrum_combined_decoder<fifi::binary8>::factory decoder_factory(max_symbols, max_symbol_size);
+    kodo_fulcrum::fulcrum_combined_decoder<fifi::binary8>::factory decoder_factory(max_symbols, max_symbol_size);
 
-    kodocpp::decoder_factory decoder_factory(
-         kodocpp::codec::fulcrum,
-         kodocpp::field::binary8,
-         max_symbols,
-         max_symbol_size);
+////    kodocpp::decoder_factory decoder_factory(
+//         kodocpp::codec::fulcrum,
+//         kodocpp::field::binary8,
+//         max_symbols,
+//         max_symbol_size);
 
 
 //     Before building the encoder/decoder, you can change the number of
@@ -94,7 +95,7 @@ int run(float e1,float e2, uint32_t expansion)
      decoder_factory.set_expansion(expansion);
 
     kodocpp::encoder encoder = encoder_factory.build();
-    kodocpp::decoder decoder = decoder_factory.build();
+    auto decoder = decoder_factory.build();
 
 
     auto recoder = recoder_factory.build(); //test relays
@@ -111,7 +112,7 @@ int run(float e1,float e2, uint32_t expansion)
 
     std::vector<uint8_t> data_out1(recoder->block_size());
 
-    std::vector<uint8_t> data_out2(decoder.block_size());
+    std::vector<uint8_t> data_out2(decoder->block_size());
 
     // Fill the input buffer with random data
     std::generate(data_in.begin(), data_in.end(), rand);
@@ -123,7 +124,7 @@ int run(float e1,float e2, uint32_t expansion)
 //    cout<<"Block size (symbols*symbol_size):"<<encoder.block_size()<< endl;
     //recoder->nested()->set_mutable_symbols(storage::storage(data_out1));
 
-    decoder.set_mutable_symbols(data_out2.data(), decoder.block_size());
+    //decoder->set_mutable_symbols(data_out2.data(), decoder->block_size());
 
 
     // Install a custom trace function for the decoder
@@ -152,7 +153,7 @@ int run(float e1,float e2, uint32_t expansion)
     uint32_t destination_packets=0;
     uint32_t relay_packets=0;
 
-    while (!decoder.is_complete())
+    while (!decoder->is_complete())
     {
         // The encoder will use a certain amount of bytes of the payload buffer
         uint32_t bytes_used = encoder.write_payload(payload.data());
@@ -169,6 +170,8 @@ int run(float e1,float e2, uint32_t expansion)
 
         relay_packets++;
         recoder->read_payload(payload.data());
+//        std::cout << "Payload processed by recoder, current rank = "
+//                          << recoder->rank() << std::endl << std::endl;
        	recoder->nested()->write_payload(payload_recoder.data());
 
 //         Simulate a channel with a e2 loss rate
@@ -178,10 +181,10 @@ int run(float e1,float e2, uint32_t expansion)
             continue;
         }
         destination_packets++;
-//       	decoder.read_payload(payload.data());
-        decoder.read_payload(payload_recoder.data());
-        std::cout << "Payload processed by decoder, current rank = "
-                  << decoder.rank() << std::endl << std::endl;
+       	//decoder.read_payload(payload.data());
+        decoder->read_payload(payload_recoder.data());
+//        std::cout << "Payload processed by decoder, current rank = "
+//                  << decoder->rank() << std::endl << std::endl;
     }
 
 //    std::cout << "Lost link1: " << lost_link1 << std::endl;
@@ -190,6 +193,7 @@ int run(float e1,float e2, uint32_t expansion)
 //    std::cout << "Number of packets sent by relay: " << relay_packets <<std::endl;
 //    std::cout << "Number of packets sent by relay: " << relay_packets <<std::endl;
     // Check if we properly decoded the data
+    decoder->copy_from_symbols(storage::storage(data_out2));
 //    if (data_in == data_out2)
 //    {
 //        std::cout << "Data decoded correctly" << std::endl;
@@ -200,7 +204,7 @@ int run(float e1,float e2, uint32_t expansion)
 //                  << "please file a bug report :)" << std::endl;
 //    }
 
-    myfile << e2 << "," <<source_packets-max_symbols/(1-e2) << "," << source_packets-max_symbols/(1-e2) << "," <<expansion <<"," <<endl;
+    myfile << e2 << "," <<relay_packets-max_symbols/(1-e2) << "," << source_packets-max_symbols/(1-e2) << "," <<expansion <<"," <<endl;
 
 //    std::cout << source_packets << " "
 //    		<< lost_link1 << " "
