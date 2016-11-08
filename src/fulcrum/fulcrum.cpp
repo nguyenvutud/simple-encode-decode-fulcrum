@@ -33,7 +33,7 @@ ofstream myfile;
 int main()
 {
     srand((uint32_t)time(0));
-	int runs=30;
+	int runs=0;
     std::vector<int> packets_sent;
 	myfile.open("out.csv");
 	myfile<<"ErasureProb,RelayPackets,DestinationPackets,Expansion,\n";
@@ -161,7 +161,7 @@ int run(float e1,float e2, uint32_t expansion)
 //                  << bytes_used << std::endl;
         source_packets++;
         // Simulate a channel with a 50% loss rate
-        if (( (float) rand()/RAND_MAX) <= e1)
+        if (( (float) rand()/RAND_MAX) < e1)
         {
         	lost_link1++;
             continue;
@@ -175,7 +175,7 @@ int run(float e1,float e2, uint32_t expansion)
        	recoder->nested()->write_payload(payload_recoder.data());
 
 //         Simulate a channel with a e2 loss rate
-        if (( (float) rand()/ RAND_MAX) <= e2)
+        if (( (float) rand()/ RAND_MAX) < e2)
         {
             lost_link2++;
             continue;
@@ -187,11 +187,11 @@ int run(float e1,float e2, uint32_t expansion)
 //                  << decoder->rank() << std::endl << std::endl;
     }
 
-//    std::cout << "Lost link1: " << lost_link1 << std::endl;
-//    std::cout << "Lost link2: " << lost_link2 << std::endl;
-//    std::cout << "Number of sent packets: " << source_packets<<std::endl;
-//    std::cout << "Number of packets sent by relay: " << relay_packets <<std::endl;
-//    std::cout << "Number of packets sent by relay: " << relay_packets <<std::endl;
+    std::cout << "Lost link1: " << lost_link1 << std::endl;
+    std::cout << "Lost link2: " << lost_link2 << std::endl;
+    std::cout << "Number of sent packets: " << source_packets<<std::endl;
+    std::cout << "Number of packets sent by relay: " << relay_packets <<std::endl;
+    std::cout << "Number of packets sent by destination: " << destination_packets<<std::endl;
     // Check if we properly decoded the data
     decoder->copy_from_symbols(storage::storage(data_out2));
 //    if (data_in == data_out2)
