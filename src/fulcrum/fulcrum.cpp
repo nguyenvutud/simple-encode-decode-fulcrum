@@ -50,13 +50,13 @@ public:
 };
 
 
-int run(float e1,float e2, uint32_t expansion);
-float min(float a, float b);
+int run(double e1,double e2, uint32_t expansion);
+double min(double a, double b);
 ofstream myfile;
 int main()
 {
     srand((uint32_t)time(0));
-	int runs=30;
+	int runs=100;
     std::vector<int> packets_sent;
 	myfile.open("out.csv");
 	myfile<<"ErasureProb,RelayPackets,DestinationPackets,Expansion,\n";
@@ -73,9 +73,9 @@ int main()
 
     		}
 //    		int sum = std::accumulate(packets_sent.begin(), packets_sent.end(), 0);
-//    		cout<<"The average packets sent:"<<(float)sum/packets_sent.size()<<endl;
+//    		cout<<"The average packets sent:"<<(double)sum/packets_sent.size()<<endl;
 //    		cout<<"The expected number of transmitted packets depends on the error links:"<< 16/min(0.9,1-err*0.1)<<endl;
-//    		myfile<<err*0.1<<"," << 16/min(0.9,1-err*0.1)-(float)sum/packets_sent.size()<<","<<(float)sum/packets_sent.size()-16/min(0.9,1-err*0.1)<<","<<exp <<"," <<endl;
+//    		myfile<<err*0.1<<"," << 16/min(0.9,1-err*0.1)-(double)sum/packets_sent.size()<<","<<(double)sum/packets_sent.size()-16/min(0.9,1-err*0.1)<<","<<exp <<"," <<endl;
     	}
     myfile.close();
     cout<<"run completely \n";
@@ -83,10 +83,10 @@ int main()
 }
 
 
-int run(float e1,float e2, uint32_t expansion)
+int run(double e1,double e2, uint32_t expansion)
 {
     // Set the number of symbols and the symbol size
-    uint32_t symbols = 32;
+    uint32_t symbols = 128;
     uint32_t max_symbol_size = 1600;
 
     // Create encoder/decoder factories that we will use to build the actual
@@ -184,7 +184,7 @@ int run(float e1,float e2, uint32_t expansion)
 //                  << bytes_used << std::endl;
         source_packets++;
         // Simulate a channel with a e1% loss rate
-        if (( (float) rand()/RAND_MAX) < e1)
+        if (( (double) rand()/RAND_MAX) < e1)
         {
         	lost_link1++;
             continue;
@@ -202,7 +202,7 @@ int run(float e1,float e2, uint32_t expansion)
         relay_packets++;
 
 //         Simulate a channel with a e2 loss rate
-        if (( (float) rand()/ RAND_MAX) < e2)
+        if (( (double) rand()/ RAND_MAX) < e2)
         {
             lost_link2++;
             continue;
@@ -247,6 +247,6 @@ int run(float e1,float e2, uint32_t expansion)
     return source_packets;
 }
 //
-float min(float a, float b){
+double min(double a, double b){
 	return a<b ? a:b;
 }
