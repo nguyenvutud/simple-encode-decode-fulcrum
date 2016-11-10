@@ -25,8 +25,7 @@
 #include <storage/storage.hpp>
 
 using namespace std;
-//This is a temporary change
-//everything changes with store in here
+
 
 template<class SuperCoder>
 class my_decoder : public SuperCoder
@@ -57,7 +56,7 @@ ofstream myfile;
 int main()
 {
     srand((uint32_t)time(0));
-	int runs=100;
+	int runs=30;
     std::vector<int> packets_sent;
 	myfile.open("out.csv");
 	myfile<<"ErasureProb,RelayPackets,DestinationPackets,Expansion,\n";
