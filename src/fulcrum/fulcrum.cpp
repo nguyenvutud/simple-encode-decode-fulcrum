@@ -53,10 +53,10 @@ public:
 int run(double e1,double e2, uint32_t expansion);
 double min(double a, double b);
 ofstream myfile;
-int main()
+int mainf()
 {
     srand((uint32_t)time(0));
-	int runs=100;
+	int runs=30;
     std::vector<int> packets_sent;
 	myfile.open("out.csv");
 	myfile<<"ErasureProb,RelayPackets,DestinationPackets,Expansion,\n";
@@ -100,9 +100,11 @@ int run(double e1,double e2, uint32_t expansion)
     // We query the maximum number of expansion symbols for the fulcrum factory
 //    std::cout << "Max expansion of the encoder factory: "
 //              << encoder_factory.max_expansion() << std::endl;
+    using fulcrum_inner_recoder_type=kodo_fulcrum::fulcrum_inner_decoder<fifi::binary>;
+    using fulcrum_combined_decoder_type=my_decoder<kodo_fulcrum::fulcrum_combined_decoder<fifi::binary8>>;
 
-    kodo_fulcrum::fulcrum_inner_decoder<fifi::binary>::factory recoder_factory(symbols, max_symbol_size);
-    my_decoder<kodo_fulcrum::fulcrum_combined_decoder<fifi::binary8>>::factory decoder_factory(symbols, max_symbol_size);
+    fulcrum_inner_recoder_type::factory recoder_factory(symbols, max_symbol_size);
+    fulcrum_combined_decoder_type::factory decoder_factory(symbols, max_symbol_size);
 
 ////    kodocpp::decoder_factory decoder_factory(
 //         kodocpp::codec::fulcrum,
